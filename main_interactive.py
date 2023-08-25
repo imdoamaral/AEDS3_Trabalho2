@@ -21,15 +21,19 @@ def main():
     threshold = float(input("Informe o threshold para filtragem das arestas (ex: 0.9): "))
     gv.aplicar_threshold(threshold)
     
-    # Inverte os pesos das arestas para cálculo de centralidade
+    # Inverte os pesos das arestas TEMPORARIAMENTE para cálculo de centralidade
+    grafo_temporario = gv.grafo.copy()
     gv.inverter_pesos()
     
     # Realiza as análises e visualizações
     centralidade = av.calcular_centralidade(gv.grafo)
+    av.salvar_centralidade(centralidade, gv.grafo, ano)
     
-    av.salvar_centralidade(centralidade, ano)
-    av.salvar_heatmap(gv.grafo, ano)
+    # Restaurar o grafo ao seu estado original após calcular centralidade
+    gv.grafo = grafo_temporario
+
     av.salvar_grafo(gv.grafo, ano)
+    av.salvar_heatmap(gv.grafo, ano)
 
 if __name__ == "__main__":
     main()
