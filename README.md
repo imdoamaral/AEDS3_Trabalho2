@@ -1,24 +1,25 @@
+# Análise de Proximidade na Câmara de Deputados
 
-# Projeto de Análise de Votações da Câmara dos Deputados
+## Descrição:
+Este projeto analisa as relações de proximidade entre deputados na Câmara dos Deputados do Brasil onde, através de uma interface gráfica, o usuário pode definir parâmetros específicos para a sua análise.
 
-Este projeto analisa os dados de votações da Câmara dos Deputados, criando um grafo de votações e gerando visualizações úteis para análise.
+O programa gera três tipos principais de visualizações:
 
-## Instruções de Instalação
+1. Centralidade de Betweenness: Mostra a importância dos deputados como "pontes" na rede.
+2. Heatmap: Representa a correlação entre os deputados com base em suas concordâncias.
+3. Grafo de Conexões: Visualiza as conexões entre deputados.
 
-1. Faça o download do projeto;
+## Dependências:
+    - pandas: Para manipulação e análise de dados.
+    - numpy: Suporte para arrays e funções matemáticas.
+    - networkx: Para criação, manipulação e estudo da estrutura de redes complexas.
+    - matplotlib: Para criação de visualizações/gráficos.
+    - seaborn: Para melhoria na visualização de gráficos e plots estatísticos.
+    - tkinter: Para a interface gráfica do usuário.
 
-2. Instale as bibliotecas necessárias:
-```
-pip install pandas networkx matplotlib seaborn scipy
-```
+## Comando para Instalação das Dependências:
+    pip install pandas numpy networkx matplotlib seaborn
 
-3. Execute o programa:
-```
-python main_interactive.py
-```
-
-4. Siga as instruções exibidas para analisar os dados e gerar visualizações.
-
----
-
-Espero que este projeto seja útil para sua análise! Qualquer feedback ou contribuição é bem-vindo.
+## Autores:
+    Henrique Barcelos Saraiva - 19.2.8007
+    Israel Matias do Amaral - 18.1.8050
