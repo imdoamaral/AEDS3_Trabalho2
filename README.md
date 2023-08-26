@@ -1,5 +1,11 @@
 # Análise de Proximidade na Câmara de Deputados
 
+<img src="resultados/interface_grafica.png">
+
+<br>
+
+<img src="resultados/graph_2022_PT-PL_threshold0.9.png">
+
 ## Descrição:
 Este projeto analisa as relações de proximidade entre deputados na Câmara dos Deputados do Brasil onde, através de uma interface gráfica, o usuário pode definir parâmetros específicos para a sua análise.
 
