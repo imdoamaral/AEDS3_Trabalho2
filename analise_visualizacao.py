@@ -9,22 +9,22 @@ def calcular_centralidade(grafo):
     """Calcula a centralidade dos nós do grafo."""
     return nx.betweenness_centrality(grafo, weight='weight')
 
-def salvar_centralidade(centralidade, grafo, ano):
-    """Salva a lista ordenada de centralidade em um arquivo .png."""
-    sorted_centralidade = sorted(centralidade.items(), key=lambda x: x[1], reverse=True)
+def salvar_centralidade(centralidade, grafo, ano, N=100):
+    """Salva a lista ordenada de centralidade em um arquivo .png com os N deputados de maior centralidade."""
+    sorted_centralidade = sorted(centralidade.items(), key=lambda x: x[1], reverse=True)[:N]
     
-    # Modificar os rótulos para incluir o partido antes do nome do deputado
-    rótulos = [f"({grafo.nodes[no]['partido']}) {no}" for no in [item[0] for item in sorted_centralidade]]
+    # Modificar os rótulos para incluir o partido após o nome do deputado
+    rotulos = [f"{no} ({grafo.nodes[no]['partido']})" for no in [item[0] for item in sorted_centralidade]]
     
-    fig, ax = plt.subplots(figsize=(10, 15))
+    fig, ax = plt.subplots(figsize=(15, 15))
     valores = [item[1] for item in sorted_centralidade]
     
-    ax.barh(rótulos, valores, color='blue')
-    ax.invert_yaxis()  # Inverter o eixo y para exibir os maiores valores no topo
+    ax.barh(rotulos, valores, color='blue')
+    ax.invert_yaxis()  # Invert y axis to display the highest values at the top
     ax.set_xlabel('Centralidade')
     ax.set_ylabel('Deputados')
     ax.set_title(f'Centralidade dos Deputados - {ano}')
-    plt.tight_layout()
+    plt.tight_layout(pad=2)  # Aumentar o padding
     
     if not os.path.exists("images"):
         os.makedirs("images")
@@ -33,19 +33,37 @@ def salvar_centralidade(centralidade, grafo, ano):
     plt.close()
 
 def salvar_heatmap(grafo, ano):
-    """Salva um heatmap da matriz de adjacência em um arquivo .png, incluindo o partido nos rótulos."""
+    """Salva um heatmap da matriz de adjacência em um arquivo .png, com deputados agrupados por partido."""
+    
+    # Convertendo o grafo para uma matriz de adjacência no formato DataFrame
     matriz_adjacencia = nx.to_pandas_adjacency(grafo, weight='weight')
+    
+    # Criando uma lista ordenada dos partidos com base na quantidade de deputados
+    contagem_partidos = {}
+    for node, data in grafo.nodes(data=True):
+        partido = data['partido']
+        contagem_partidos[partido] = contagem_partidos.get(partido, 0) + 1
+    partidos_ordenados = sorted(contagem_partidos.keys(), key=lambda x: -contagem_partidos[x])
+    
+    # Ordenando os deputados na matriz de adjacência com base nos partidos
+    deputados_ordenados = sorted(matriz_adjacencia.index, key=lambda x: (partidos_ordenados.index(grafo.nodes[x]['partido']), x))
+    matriz_adjacencia = matriz_adjacencia.reindex(deputados_ordenados)
+    matriz_adjacencia = matriz_adjacencia[deputados_ordenados]
     
     # Modificar os rótulos do índice e das colunas para incluir o partido
     rotulos = [f"{no} ({grafo.nodes[no]['partido']})" for no in matriz_adjacencia.index]
     matriz_adjacencia.index = rotulos
     matriz_adjacencia.columns = rotulos
-    
+
     plt.figure(figsize=(20, 20))
+    
+    # Desenhando o heatmap
     sns.heatmap(matriz_adjacencia, cmap='coolwarm', center=0)
+
+    # Adicionando o título
     plt.title(f"Heatmap de Correlação entre Deputados - {ano}")
 
-    # Verifica se o diretório "images" existe, caso não, ele é criado
+    # Verificando se o diretório "images" existe e salvando a figura
     if not os.path.exists("images"):
         os.makedirs("images")
     
