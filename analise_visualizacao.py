@@ -9,22 +9,22 @@ def calcular_centralidade(grafo):
     """Calcula a centralidade dos nós do grafo."""
     return nx.betweenness_centrality(grafo, weight='weight')
 
-def salvar_centralidade(centralidade, grafo, ano, N=100):
+def salvar_centralidade(centralidade, grafo, ano, N=80):
     """Salva a lista ordenada de centralidade em um arquivo .png com os N deputados de maior centralidade."""
     sorted_centralidade = sorted(centralidade.items(), key=lambda x: x[1], reverse=True)[:N]
     
-    # Modificar os rótulos para incluir o partido após o nome do deputado
+    # Modifica os rótulos para incluir o partido após o nome do deputado
     rotulos = [f"{no} ({grafo.nodes[no]['partido']})" for no in [item[0] for item in sorted_centralidade]]
     
     fig, ax = plt.subplots(figsize=(15, 15))
     valores = [item[1] for item in sorted_centralidade]
     
     ax.barh(rotulos, valores, color='blue')
-    ax.invert_yaxis()  # Invert y axis to display the highest values at the top
+    ax.invert_yaxis()  # Inverte o eixo y para mostrar os maiores valores no topo
     ax.set_xlabel('Centralidade')
     ax.set_ylabel('Deputados')
     ax.set_title(f'Centralidade dos Deputados - {ano}')
-    plt.tight_layout(pad=2)  # Aumentar o padding
+    plt.tight_layout(pad=2)  # Aumenta o padding
     
     if not os.path.exists("images"):
         os.makedirs("images")
@@ -33,37 +33,29 @@ def salvar_centralidade(centralidade, grafo, ano, N=100):
     plt.close()
 
 def salvar_heatmap(grafo, ano):
-    """Salva um heatmap da matriz de adjacência em um arquivo .png, com deputados agrupados por partido."""
+    """Salva um heatmap da matriz de adjacência em um arquivo .png, incluindo o partido nos rótulos."""
     
-    # Convertendo o grafo para uma matriz de adjacência no formato DataFrame
-    matriz_adjacencia = nx.to_pandas_adjacency(grafo, weight='weight')
+    # Cria uma lista ordenada de nós com base no atributo do partido
+    nos_ordenados = sorted(grafo.nodes(data=True), key=lambda x: x[1]['partido'])
     
-    # Criando uma lista ordenada dos partidos com base na quantidade de deputados
-    contagem_partidos = {}
-    for node, data in grafo.nodes(data=True):
-        partido = data['partido']
-        contagem_partidos[partido] = contagem_partidos.get(partido, 0) + 1
-    partidos_ordenados = sorted(contagem_partidos.keys(), key=lambda x: -contagem_partidos[x])
+    # Reordena o grafo com base na lista ordenada de nós
+    grafo_ordenado = nx.Graph()
+    grafo_ordenado.add_nodes_from([(no[0], no[1]) for no in nos_ordenados])
+    grafo_ordenado.add_weighted_edges_from([(u, v, grafo[u][v]['weight']) for u, v in grafo.edges()])
     
-    # Ordenando os deputados na matriz de adjacência com base nos partidos
-    deputados_ordenados = sorted(matriz_adjacencia.index, key=lambda x: (partidos_ordenados.index(grafo.nodes[x]['partido']), x))
-    matriz_adjacencia = matriz_adjacencia.reindex(deputados_ordenados)
-    matriz_adjacencia = matriz_adjacencia[deputados_ordenados]
+    # Cria a matriz de adjacência a partir do grafo reordenado
+    matriz_adjacencia = nx.to_pandas_adjacency(grafo_ordenado, weight='weight')
     
-    # Modificar os rótulos do índice e das colunas para incluir o partido
-    rotulos = [f"{no} ({grafo.nodes[no]['partido']})" for no in matriz_adjacencia.index]
+    # Modifica os rótulos do índice e das colunas para incluir o partido
+    rotulos = [f"{no} ({grafo_ordenado.nodes[no]['partido']})" for no in matriz_adjacencia.index]
     matriz_adjacencia.index = rotulos
     matriz_adjacencia.columns = rotulos
-
-    plt.figure(figsize=(20, 20))
     
-    # Desenhando o heatmap
+    plt.figure(figsize=(20, 20))
     sns.heatmap(matriz_adjacencia, cmap='coolwarm', center=0)
-
-    # Adicionando o título
     plt.title(f"Heatmap de Correlação entre Deputados - {ano}")
 
-    # Verificando se o diretório "images" existe e salvando a figura
+    # Verifica se o diretório "images" existe, caso não, ele é criado
     if not os.path.exists("images"):
         os.makedirs("images")
     
@@ -73,7 +65,7 @@ def salvar_heatmap(grafo, ano):
 def salvar_grafo(grafo, ano):
     plt.figure(figsize=(15, 15))
     
-    # Utilizando um layout tipo spring para melhor visualização
+    # Utiliza um layout do tipo spring para melhor visualização
     posicao = nx.spring_layout(grafo, k=0.3)
 
     cores_partidos = {
@@ -86,18 +78,18 @@ def salvar_grafo(grafo, ano):
         'PL': 'mediumblue'
     }
     
-    # Desenhando os nós com cores baseadas no atributo partido
+    # Desenha os nós com cores baseadas no partido
     cores_nos = [cores_partidos[grafo.nodes[no]['partido']] for no in grafo.nodes]
     
-    # Desenhar os nós e arestas
+    # Desenha os nós e arestas
     nx.draw_networkx_nodes(grafo, pos=posicao, node_size=500, node_color=cores_nos, alpha=0.8)
     nx.draw_networkx_labels(grafo, pos=posicao, font_size=10, verticalalignment='bottom')
     nx.draw_networkx_edges(grafo, pos=posicao, alpha=0.5)
 
-    # Identificar os partidos presentes no grafo
+    # Identifica os partidos presentes no grafo
     partidos_presentes = set(nx.get_node_attributes(grafo, 'partido').values())
 
-    # Criar uma legenda somente para os partidos presentes
+    # Cria uma legenda somente para os partidos presentes
     legend_handles = [mpatches.Patch(color=cores_partidos[partido], label=partido) 
                       for partido in partidos_presentes]
     

@@ -29,7 +29,7 @@ def main():
     centralidade = av.calcular_centralidade(gv.grafo)
     av.salvar_centralidade(centralidade, gv.grafo, ano)
     
-    # Restaurar o grafo ao seu estado original após calcular centralidade
+    # Restaura o grafo ao seu estado original após calcular centralidade
     gv.grafo = grafo_temporario
 
     av.salvar_grafo(gv.grafo, ano)
